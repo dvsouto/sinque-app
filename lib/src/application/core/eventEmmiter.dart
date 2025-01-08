@@ -4,7 +4,13 @@ import 'package:sinque/src/core/appLocator.dart';
 abstract class EventEmiter<T> {
   void listen();
 
-  void dispatch() {
+  Future<void> dispatch() async {
+    final EventBus eventBus = AppLocator().eventBus;
+
+    eventBus.fire(this);
+  }
+
+  void dispatchSync() {
     final EventBus eventBus = AppLocator().eventBus;
 
     eventBus.fire(this);

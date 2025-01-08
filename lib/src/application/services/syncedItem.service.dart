@@ -21,4 +21,6 @@ class SyncedItemService {
   List<SyncedItem> watch(WidgetRef ref) {
     return ref.watch(syncedItemNotifierProvider);
   }
+
+  List<SyncedItem> get state => read();
 }

@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class BlinkingIcon extends StatefulWidget {
-  late bool blinkActive;
-  late Widget child;
+  final bool blinkActive;
+  final Widget child;
 
-  BlinkingIcon({super.key, this.blinkActive = true, required this.child});
+  const BlinkingIcon({super.key, this.blinkActive = true, required this.child});
 
   @override
   State<BlinkingIcon> createState() => _BlinkingIconState();

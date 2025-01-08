@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sinque/src/application/services/networkDevices.service.dart';
 import 'package:sinque/src/application/services/networkStatus.service.dart';
-import 'package:sinque/src/application/services/packet.service.dart';
 import 'package:sinque/src/presentation/home/widgets/ActionButton.widget.dart';
 import 'package:sinque/src/presentation/home/widgets/BlinkingIcon.widget.dart';
+import 'package:sinque/src/presentation/home/widgets/InputTextDialog.widget.dart';
 import 'package:sinque/src/presentation/home/widgets/ListSyncedItem.widget.dart';
 import 'package:sinque/src/presentation/keyboardHandler/keyboardHandler.widget.dart';
 
@@ -25,25 +28,25 @@ class HomeView extends ConsumerWidget {
   //   );
   // }
 
-  Widget udpConnectionIcon() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.0),
-      child: Icon(Icons.wifi_calling),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final networkStatus = NetworkStatusService().watch(ref);
+    final int networkDevicesCount =
+        NetworkDevicesService().watch(ref).length + 1;
 
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 75,
         leading: Builder(
-          builder: (context) => IconButton(
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-            icon: Icon(Icons.menu),
+          builder: (context) => Padding(
+            padding:
+                Platform.isMacOS ? EdgeInsets.only(top: 16.0) : EdgeInsets.zero,
+            child: IconButton(
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+              icon: Icon(Icons.menu),
+            ),
           ),
         ),
         title: Row(
@@ -52,18 +55,41 @@ class HomeView extends ConsumerWidget {
             Text(
               "Sinque",
               style: TextStyle(fontWeight: FontWeight.w100),
-            ),
+            )
           ],
         ),
         actions: [
-          BlinkingIcon(
-            blinkActive: !networkStatus.isConnected(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Tooltip(
-                message: "Connecting to local network",
-                child: Icon(Icons.wifi_find_outlined),
-              ),
+          Padding(
+            padding: Platform.isWindows || Platform.isLinux
+                ? EdgeInsets.only(right: 30.0)
+                : EdgeInsets.zero,
+            child: Row(
+              children: [
+                BlinkingIcon(
+                  blinkActive: true,
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Tooltip(
+                      message:
+                          "${networkStatus.isConnected() ? 'Connected' : 'Connecting'} to wifi server",
+                      child: Icon(Icons.wifi),
+                    ),
+                  ),
+                ),
+                BlinkingIcon(
+                  blinkActive: !networkStatus.isConnected(),
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Tooltip(
+                        message:
+                            "${networkStatus.isConnected() ? 'Connected' : 'Connecting'} to local network",
+                        child: Badge(
+                          label: Text(networkDevicesCount.toString()),
+                          child: Icon(Icons.wifi_tethering),
+                        )),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -74,7 +100,7 @@ class HomeView extends ConsumerWidget {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Theme.of(context).colorScheme.primary,
               ),
               child: Text(
                 'Drawer Header',
@@ -116,7 +142,7 @@ class HomeView extends ConsumerWidget {
               Container(
                 height: 140.0,
                 width: double.infinity,
-                padding: EdgeInsets.all(8.0),
+                padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -127,7 +153,7 @@ class HomeView extends ConsumerWidget {
                         icon: Icons.file_copy,
                         onPressed: () {
                           //   multicast.sendPacket(
-                          //     UDPPacketType.fileSent,
+                          //     PacketType.fileSent,
                           //     "Sync file..",
                           //   );
 
@@ -141,7 +167,8 @@ class HomeView extends ConsumerWidget {
                       child: ActionButton(
                         text: "Sync Text",
                         icon: Icons.text_format,
-                        onPressed: () => PacketService().sendText("My text"),
+                        onPressed: () => InputTextDialog.show(context),
+                        // PacketService().sendTextToAllDevices("My text"),
                       ),
                     ),
                   ],

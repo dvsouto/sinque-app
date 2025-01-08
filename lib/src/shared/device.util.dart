@@ -1,6 +1,7 @@
 // ignore: file_names
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:sinque/src/domain/Device.dart';
 
 class DeviceUtil {
   static getHostname() async {
@@ -35,5 +36,17 @@ class DeviceUtil {
     }
 
     return 'unknown';
+  }
+
+  static isMobile() {
+    return Platform.isIOS || Platform.isAndroid;
+  }
+
+  static isDesktop() {
+    return Platform.isMacOS || Platform.isLinux || Platform.isWindows;
+  }
+
+  static Future<Device> retrieve() async {
+    return Device.detect();
   }
 }

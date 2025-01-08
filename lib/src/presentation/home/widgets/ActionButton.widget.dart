@@ -26,7 +26,7 @@ class ActionButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
-        backgroundColor: Color(0xFF474747),
+        backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
       child: Container(
         alignment: Alignment.center,
@@ -44,7 +44,7 @@ class ActionButton extends StatelessWidget {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 14.0,
-                fontWeight: FontWeight.w100,
+                fontWeight: FontWeight.w200,
               ),
             ),
           ],

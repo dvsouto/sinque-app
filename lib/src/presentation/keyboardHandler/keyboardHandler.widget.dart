@@ -39,16 +39,19 @@ class _KeyboardHandlerState extends State<KeyboardHandler> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      focusNode: _focusNode,
-      onKeyEvent: _handleKeyPress,
-      child: GestureDetector(
-        onTap: () {
-          print("Tap");
-          FocusScope.of(context).requestFocus(_focusNode);
-        },
-        child: widget.child,
-      ),
+    return Container(
+      child: widget.child,
     );
+    // return KeyboardListener(
+    //   focusNode: _focusNode,
+    //   onKeyEvent: _handleKeyPress,
+    //   child: GestureDetector(
+    //     onTap: () {
+    //       print("Tap");
+    //       FocusScope.of(context).requestFocus(_focusNode);
+    //     },
+    //     child: widget.child,
+    //   ),
+    // );
   }
 }

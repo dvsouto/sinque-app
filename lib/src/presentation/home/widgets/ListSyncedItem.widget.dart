@@ -11,7 +11,12 @@ class ListSyncedItem extends ConsumerWidget {
     final syncedItens = SyncedItemService().watch(ref).reversed.toList();
 
     if (syncedItens.isEmpty) {
-      return const Placeholder();
+      return Container(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
+          child: Text("No data shared"),
+        ),
+      );
     }
 
     return ListView.builder(

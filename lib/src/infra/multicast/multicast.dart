@@ -5,7 +5,7 @@ import 'package:sinque/src/application/events/packetReceived.event.dart';
 import 'package:sinque/src/application/events/packetSent.event.dart';
 import 'package:sinque/src/application/services/networkStatus.service.dart';
 import 'package:sinque/src/domain/NetworkStatus.dart';
-import 'package:sinque/src/domain/UDPPacket.dart';
+import 'package:sinque/src/domain/Packet.dart';
 import 'package:sinque/src/domain/Network.dart';
 import 'package:sinque/src/domain/Device.dart';
 import 'package:sinque/src/shared/network.util.dart';
@@ -15,7 +15,7 @@ class Multicast {
   final int multicastPort = 44294;
 
   static late RawDatagramSocket _socket;
-  static late InternetAddress _internetAddress;
+  static late InternetAddress _multicastAddressInstance;
   static bool _connected = false;
   static final bool _retryConnect = true;
   static final int _retryAfterSeconds = 10;
@@ -33,40 +33,54 @@ class Multicast {
       return true;
     }
 
-    networkStatusService.setStatus(NetworkStatusType.connecting);
+    // networkStatusService.setStatus(NetworkStatusType.connecting);
+
+    final localIpAddress = await NetworkUtil.retrieveLocalIpAddress();
+    final localInterface = await NetworkUtil.retrieveLocalNetworkInterface();
 
     print("Connecting multicast...");
+    print("@local ip: ${localIpAddress}");
+    print("@interface: ${localInterface}");
+
+    final networkInterfaces = await NetworkInterface.list();
+    for (var interface in networkInterfaces) {
+      print('Interface: ${interface.name}, Addresses: ${interface.addresses}');
+    }
 
     try {
       _socket = await RawDatagramSocket.bind(
+        // InternetAddress('192.168.0.0'),
+        // bindNetworkInterface.addresses.first,
         InternetAddress.anyIPv4,
+        // bindNetworkInterface?.addresses.first ?? InternetAddress.anyIPv4,
         multicastPort,
         reuseAddress: true,
         reusePort: true,
       );
 
-      _internetAddress = InternetAddress(multicastAddress);
+      _multicastAddressInstance = InternetAddress(multicastAddress);
 
-      _socket.joinMulticast(_internetAddress);
+      // _socket.setRawOption(RawSocketOption(RawSocketOption.levelIPv4, 12, UIint8List.fromList()))
+      _socket.joinMulticast(_multicastAddressInstance, localInterface);
 
-      _socket.multicastHops = 1;
+      _socket.multicastHops = 50;
       _socket.broadcastEnabled = true;
       _socket.writeEventsEnabled = true;
       _socket.readEventsEnabled = true;
-
+      _socket.multicastLoopback = true; // @TODO check this
       _socket.listen(_listen, onError: _onError, onDone: _onDone);
 
       await _getUserInfo();
 
       _connected = true;
 
-      networkStatusService.setStatus(NetworkStatusType.connected);
+      // networkStatusService.setStatus(NetworkStatusType.connected);
 
       print('Multicast connected at $multicastAddress:$multicastPort');
     } catch (err, stackTrace) {
       _connected = false;
 
-      networkStatusService.setStatus(NetworkStatusType.idle);
+      // networkStatusService.setStatus(NetworkStatusType.idle);
 
       _onError(err, stackTrace);
     }
@@ -91,18 +105,22 @@ class Multicast {
     _socket.close();
     _connected = false;
 
-    NetworkStatusService().setStatus(NetworkStatusType.idle);
+    // NetworkStatusService().setStatus(NetworkStatusType.idle);
   }
 
   Future<void> _getUserInfo() async {
     _uuid = await NetworkUtil.retrieveUuid();
 
+    final localNetworkAddress = await NetworkUtil.retrieveLocalIpAddress();
+
     _network = Network(
       uuid: _uuid,
-      address: _internetAddress.address,
+      address: localNetworkAddress.address,
       hostname: Platform.localHostname,
+      serverPort: 9999,
     );
 
+    print('@network: ${_network.toMap()}');
     _device = await Device.detect();
   }
 
@@ -112,7 +130,7 @@ class Multicast {
 
       if (datagram != null) {
         final message = utf8.decode(datagram.data);
-        final decoded = UDPPacket.decode(message);
+        final decoded = Packet.decode(message);
 
         // Call handler only if the uuid of message belongs to someone else
         // if (decoded.getNetwork().getUuid() != _uuid) {
@@ -130,8 +148,8 @@ class Multicast {
     }
   }
 
-  int sendPacket(UDPPacketType type, String? data) {
-    UDPPacket packet = UDPPacket(
+  int sendPacket(PacketType type, String? data) {
+    Packet packet = Packet(
       network: _network,
       device: _device,
       type: type,
@@ -141,21 +159,23 @@ class Multicast {
     try {
       return _socket.send(
         utf8.encode(packet.encode()),
-        _internetAddress,
+        // InternetAddress('192.168.1.3'),
+        _multicastAddressInstance,
         multicastPort,
       );
     } catch (err, stackTrace) {
       _onError(err, stackTrace);
 
-      if (err is SocketException) {
-        _onClose();
-      }
+      // @TODO check this
+      // if (err is SocketException) {
+      //   _onClose();
+      // }
 
       return -1;
     }
   }
 
-  void _onMessage(Datagram datagram, UDPPacket packet) {
+  void _onMessage(Datagram datagram, Packet packet) {
     if (packet.itsMe()) {
       PacketSentEvent(packet: packet).dispatch();
     } else {
@@ -168,6 +188,8 @@ class Multicast {
   }
 
   void _onDone() {
+    print('Connection lost');
+
     _onClose();
   }
 
@@ -179,7 +201,7 @@ class Multicast {
 
     _connected = false;
 
-    NetworkStatusService().setStatus(NetworkStatusType.idle);
+    // NetworkStatusService().setStatus(NetworkStatusType.idle);
 
     if (_retryConnect) {
       open();
@@ -202,9 +224,10 @@ class Multicast {
     return _socket;
   }
 
-  InternetAddress getInternetAddress() {
-    return _internetAddress;
-  }
+  // @TODO
+  // InternetAddress getInternetAddress() {
+  //   return _internetAddress;
+  // }
 
   String getUuid() {
     return _uuid;

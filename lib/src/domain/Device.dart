@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -112,6 +113,10 @@ class Device {
 
   String? getModel() {
     return _model;
+  }
+
+  String encode() {
+    return jsonEncode(toMap());
   }
 
   Map<String, dynamic> toMap() {

@@ -10,8 +10,28 @@ class NetworkStatusService {
     _container = AppLocator().container;
   }
 
-  void setStatus(NetworkStatusType status) {
-    _container.read(networkStatusNotifierProvider.notifier).setStatus(status);
+  void setBroadcastStatus(NetworkStatusType status) {
+    _container
+        .read(networkStatusNotifierProvider.notifier)
+        .setBroadcastStatus(status);
+  }
+
+  void setDiscoveryStatus(NetworkStatusType status) {
+    _container
+        .read(networkStatusNotifierProvider.notifier)
+        .setDiscoverystatus(status);
+  }
+
+  void setDeviceStatus(NetworkStatusType status) {
+    _container
+        .read(networkStatusNotifierProvider.notifier)
+        .setDeviceStatus(status);
+  }
+
+  void setServerStatus(NetworkStatusType status) {
+    _container
+        .read(networkStatusNotifierProvider.notifier)
+        .setServerStatus(status);
   }
 
   NetworkStatus read() {
@@ -21,4 +41,6 @@ class NetworkStatusService {
   NetworkStatus watch(WidgetRef ref) {
     return ref.watch(networkStatusNotifierProvider);
   }
+
+  NetworkStatus get state => read();
 }

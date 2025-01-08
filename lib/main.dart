@@ -6,8 +6,7 @@ import 'package:sinque/src/infra/window/window.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Window().initialize();
-
+  await Window().initialize();
   await AppLocator().initialize();
 
   runApp(const App());

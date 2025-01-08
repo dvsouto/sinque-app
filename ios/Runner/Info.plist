@@ -59,5 +59,16 @@
 			<string>fetch</string>
 			<string>remote-notification</string>
 	</array>
+
+	<!-- Enable Local Network Usage -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Este aplicativo requer acesso à rede local para comunicação.</string>
+
+	<!-- Enable Multicast Bonjour -->
+	<key>NSBonjourServices</key>
+	<array>
+	    <string>_http._tcp</string>
+			<string>_sinque-app._tcp</string>
+	</array>
 </dict>
 </plist>

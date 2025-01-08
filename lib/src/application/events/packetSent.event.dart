@@ -1,16 +1,18 @@
 import 'package:sinque/src/application/core/eventEmmiter.dart';
+import 'package:sinque/src/application/events/PingSent.event.dart';
+import 'package:sinque/src/application/events/pongSent.event.dart';
 import 'package:sinque/src/application/events/textSent.event.dart';
 import 'package:sinque/src/domain/SyncedItem.dart';
-import 'package:sinque/src/domain/UDPPacket.dart';
+import 'package:sinque/src/domain/Packet.dart';
 
 class PacketSentEvent extends EventEmiter<PacketSentEvent> {
-  final UDPPacket? _packet;
+  final Packet? _packet;
 
-  PacketSentEvent({UDPPacket? packet}) : _packet = packet;
+  PacketSentEvent({Packet? packet}) : _packet = packet;
 
   @override
   void listen() {
-    if (packet.getType() == UDPPacketType.textSent) {
+    if (packet.getType() == PacketType.textSent) {
       SyncedItem item = SyncedItem(
         type: 'text',
         content: packet.getMessage(),
@@ -20,7 +22,15 @@ class PacketSentEvent extends EventEmiter<PacketSentEvent> {
 
       TextSentEvent(packet: packet, item: item).dispatch();
     }
+
+    if (packet.getType() == PacketType.ping) {
+      PingSentEvent(packet: packet).dispatch();
+    }
+
+    if (packet.getType() == PacketType.pong) {
+      PongSentEvent(packet: packet).dispatch();
+    }
   }
 
-  UDPPacket get packet => _packet!;
+  Packet get packet => _packet!;
 }
