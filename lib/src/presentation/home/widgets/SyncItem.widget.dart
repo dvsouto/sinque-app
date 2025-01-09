@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:sinque/src/application/services/networkDevices.service.dart';
 
 import 'package:sinque/src/domain/Device.dart';
 import 'package:sinque/src/domain/SyncedItem.dart';
@@ -9,6 +10,7 @@ import 'package:sinque/src/presentation/home/widgets/ActionTimeDisplay.widget.da
 import 'package:sinque/src/presentation/home/widgets/ItemActions.widget.dart';
 import 'package:sinque/src/presentation/themes/appTheme.dart';
 import 'package:sinque/src/shared/device.util.dart';
+import 'package:sinque/src/shared/network.util.dart';
 
 class SyncItem extends StatelessWidget {
   final SyncedItem item;
@@ -17,8 +19,10 @@ class SyncItem extends StatelessWidget {
 
   final double _boxHeight = 82.0;
 
-  void handleItemPress() {
-    print("ok");
+  void handleItemPress() async {
+    final devices = NetworkDevicesService().read();
+    print("@devices: ${devices.map((d) => d.encode())}");
+    print("me: ${(await NetworkUtil.retrieve()).encode()}");
   }
 
   @override

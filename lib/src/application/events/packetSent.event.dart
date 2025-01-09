@@ -4,6 +4,7 @@ import 'package:sinque/src/application/events/pongSent.event.dart';
 import 'package:sinque/src/application/events/textSent.event.dart';
 import 'package:sinque/src/domain/SyncedItem.dart';
 import 'package:sinque/src/domain/Packet.dart';
+import 'package:sinque/src/domain/TextMessage.dart';
 
 class PacketSentEvent extends EventEmiter<PacketSentEvent> {
   final Packet? _packet;
@@ -15,7 +16,7 @@ class PacketSentEvent extends EventEmiter<PacketSentEvent> {
     if (packet.getType() == PacketType.textSent) {
       SyncedItem item = SyncedItem(
         type: 'text',
-        content: packet.getMessage(),
+        content: packet.getMessage<TextMessage>().text,
         uuid: packet.getUuid(),
         device: packet.getDevice(),
       );

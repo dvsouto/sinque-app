@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:sinque/src/application/events/packetReceived.event.dart';
 import 'package:sinque/src/application/events/packetSent.event.dart';
 import 'package:sinque/src/application/services/networkStatus.service.dart';
+import 'package:sinque/src/core/packetMessage.dart';
+import 'package:sinque/src/domain/EmptyMessage.dart';
 import 'package:sinque/src/domain/NetworkStatus.dart';
 import 'package:sinque/src/domain/Packet.dart';
 import 'package:sinque/src/domain/Network.dart';
@@ -148,12 +150,12 @@ class Multicast {
     }
   }
 
-  int sendPacket(PacketType type, String? data) {
+  int sendPacket(PacketType type, PacketMessage? data) {
     Packet packet = Packet(
       network: _network,
       device: _device,
       type: type,
-      data: data ?? '',
+      data: data ?? EmptyMessage(),
     );
 
     try {

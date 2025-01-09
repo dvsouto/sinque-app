@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -78,12 +80,49 @@ class TCPServer {
   }
 
   void _listen(Uint8List data, Socket client) {
-    String message = String.fromCharCodes(data);
-    Packet packet = Packet.decode(message);
+    Future.microtask(() {
+      List<int> listenBuffer = [];
 
-    PacketReceivedEvent(packet: packet).dispatch();
+      listenBuffer.addAll(data);
 
-    // print('@Message received from client: $message');
+      int readed = 0;
+
+      while (listenBuffer.length > 0 || readed > 100) {
+        readed++;
+
+        final currentBuffer = Uint8List.fromList(listenBuffer);
+
+        final payloadSize = currentBuffer.buffer.asByteData().getUint32(0);
+        final typeHash = currentBuffer.buffer.asByteData().getUint32(8);
+        final type = _typeFromHash(typeHash);
+
+        if (listenBuffer.length >= payloadSize) {
+          final payloadBytes = currentBuffer.sublist(12, payloadSize);
+          final payload = utf8.decode(payloadBytes);
+
+          listenBuffer.removeRange(0, payloadSize);
+
+          Packet packet = Packet.decode(payload);
+
+          PacketReceivedEvent(packet: packet).dispatch();
+        } else {
+          break;
+        }
+      }
+    });
+  }
+
+  String _typeFromHash(int hash) {
+    switch (hash) {
+      case 0x4a534f4e: // "JSON"
+        return "JSON";
+      case 0x54455854: // "TEXT"
+        return "TEXT";
+      case 0x46494c45: // "FILE"
+        return "FILE";
+      default:
+        return "UNKNOWN";
+    }
   }
 
   Future<bool> stop() async {

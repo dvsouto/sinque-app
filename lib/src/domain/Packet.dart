@@ -1,4 +1,6 @@
+import 'package:sinque/src/core/packetMessage.dart';
 import 'package:sinque/src/domain/DeviceConnection.dart';
+import 'package:sinque/src/domain/EmptyMessage.dart';
 import 'package:sinque/src/domain/Network.dart';
 import 'dart:convert';
 
@@ -14,28 +16,28 @@ class Packet {
   final Device _device;
 
   PacketType _type;
-  String _data;
+  PacketMessage _data;
 
   Packet({
     String? uuid,
     required Network network,
     required Device device,
     required PacketType type,
-    required String data,
+    required PacketMessage data,
   })  : _network = network,
         _device = device,
         _type = type,
         _data = data,
         _uuid = uuid ?? Uuid().v4();
 
-  static Future<Packet> create({
-    String data = '',
+  static Future<Packet> create<T>({
+    PacketMessage? data,
     required PacketType type,
     Network? network,
     Device? device,
   }) async {
     return Packet(
-      data: data,
+      data: data ?? EmptyMessage(),
       device: device ?? await DeviceUtil.retrieve(),
       network: network ?? await NetworkUtil.retrieve(),
       type: type,
@@ -49,7 +51,7 @@ class Packet {
       'network': _network.toMap(),
       'device': _device.toMap(),
       'type': _type.toString(),
-      'data': _data,
+      'data': jsonEncode(_data.encodeMessage()),
     };
   }
 
@@ -57,12 +59,12 @@ class Packet {
     return jsonEncode(toMap());
   }
 
-  void setMessage(String data) {
-    this._data = data;
+  void setMessage(dynamic data) {
+    _data = data;
   }
 
-  String getMessage() {
-    return _data;
+  T getMessage<T extends PacketMessage>() {
+    return _data as T;
   }
 
   void setType(PacketType type) {
@@ -89,15 +91,20 @@ class Packet {
     return NetworkUtil.retrieveUuidSync() == _network.getUuid();
   }
 
-  static Packet decode(String data) {
+  static Packet decode<T>(String data) {
     final Map<String, dynamic> object = jsonDecode(data);
+    final PacketType packetType =
+        EnumUtil.namedBy<PacketType>(PacketType.values, object['type']);
 
     return Packet(
       uuid: object['uuid'],
       network: Network.decode(object['network']),
       device: Device.decode(object['device']),
       type: EnumUtil.namedBy<PacketType>(PacketType.values, object['type']),
-      data: object['data'] as String,
+      data: PacketMessage.applyDecode(
+        data: jsonDecode(object['data']),
+        packetType: packetType,
+      ),
     );
   }
 
@@ -113,4 +120,6 @@ enum PacketType {
 
   ping,
   pong,
+
+  sync,
 }

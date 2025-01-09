@@ -12,16 +12,21 @@ class DeviceConnectedEvent extends EventEmiter<DeviceConnectedEvent> {
       : _deviceConnection = deviceConnection!;
 
   @override
-  void listen() {
-    print("-- device discovered:");
-    print("@device: ${device.encode()}");
-    print("@network: ${network.encode()}");
+  void listen() async {
+    if (!deviceConnection.network.itsMe()) {
+      print("-- device discovered:");
+      print("@device: ${device.encode()}");
+      print("@network: ${network.encode()}");
 
-    final PacketService packetService = PacketService();
-    final NetworkDevicesService networkDevicesService = NetworkDevicesService();
+      final PacketService packetService = PacketService();
+      final NetworkDevicesService networkDevicesService =
+          NetworkDevicesService();
 
-    networkDevicesService.add(deviceConnection);
-    packetService.singlePing(deviceConnection);
+      // If has new device, send ping to advice
+      if (networkDevicesService.add(deviceConnection)) {
+        packetService.pingAndSync(deviceConnection);
+      }
+    }
   }
 
   DeviceConnection get deviceConnection => _deviceConnection;

@@ -11,17 +11,41 @@ class SyncedItem {
 
   DateTime _syncedAt = DateTime.now();
 
-  SyncedItem(
-      {required String type,
-      required String content,
-      required device,
-      String? uuid,
-      DateTime? syncedAt})
-      : _type = type,
+  SyncedItem({
+    required String type,
+    required String content,
+    required device,
+    String? uuid,
+    DateTime? syncedAt,
+  })  : _type = type,
         _content = content,
         _device = device,
         _uuid = uuid ?? Uuid().v4(),
         _syncedAt = syncedAt ?? DateTime.now();
+
+  bool equals(SyncedItem item) {
+    return uuid == item.uuid;
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'uuid': _uuid,
+      'type': _type.toString(),
+      'content': _content.toString(),
+      'device': device.toMap(),
+      'syncedAt': syncedAt.toIso8601String(),
+    };
+  }
+
+  static SyncedItem decode<T>(dynamic object) {
+    return SyncedItem(
+      uuid: object['uuid'],
+      type: object['type'],
+      content: object['content'],
+      device: Device.decode(object['device']),
+      syncedAt: DateTime.tryParse(object['syncedAt']),
+    );
+  }
 
   String get uuid => _uuid;
   String get type => _type;

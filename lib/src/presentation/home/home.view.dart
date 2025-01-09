@@ -9,6 +9,7 @@ import 'package:sinque/src/presentation/home/widgets/BlinkingIcon.widget.dart';
 import 'package:sinque/src/presentation/home/widgets/InputTextDialog.widget.dart';
 import 'package:sinque/src/presentation/home/widgets/ListSyncedItem.widget.dart';
 import 'package:sinque/src/presentation/keyboardHandler/keyboardHandler.widget.dart';
+import 'package:sinque/src/shared/device.util.dart';
 
 class HomeView extends ConsumerWidget {
   HomeView({super.key});
@@ -36,7 +37,7 @@ class HomeView extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 75,
+        toolbarHeight: DeviceUtil.isDesktop() ? 75 : 35,
         leading: Builder(
           builder: (context) => Padding(
             padding:
@@ -127,7 +128,7 @@ class HomeView extends ConsumerWidget {
           ],
         ),
       ),
-      body: KeyboardHandler(
+      body: SafeArea(
         child: SizedBox(
           width: double.infinity,
           height: double.infinity,

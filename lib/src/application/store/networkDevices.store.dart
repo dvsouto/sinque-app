@@ -4,10 +4,14 @@ import 'package:sinque/src/domain/DeviceConnection.dart';
 class NetworkDevicesNotifier extends StateNotifier<List<DeviceConnection>> {
   NetworkDevicesNotifier() : super(List.empty());
 
-  void add(DeviceConnection device) {
+  bool add(DeviceConnection device) {
     if (!exists(device)) {
       state = [...state, device];
+
+      return true;
     }
+
+    return false;
   }
 
   void remove(DeviceConnection device) {
@@ -41,9 +45,6 @@ class NetworkDevicesNotifier extends StateNotifier<List<DeviceConnection>> {
   }
 
   void pong(DeviceConnection device) {
-    // If it was removed for some reason but received a pong, then add it back to the list
-    add(device);
-
     state = state.map((itDevice) {
       if (itDevice.equals(device)) {
         itDevice.pong();

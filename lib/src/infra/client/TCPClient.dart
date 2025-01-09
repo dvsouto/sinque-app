@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -65,7 +67,7 @@ class TCPClient {
   }
 
   Future<bool> send(
-    Packet packet, {
+    List<Packet> packets, {
     bool autoConnect = true,
     bool autoDisconnect = true,
   }) async {
@@ -77,11 +79,16 @@ class TCPClient {
       bool success = false;
 
       try {
-        _client.write(packet.encode());
+        for (Packet packet in packets) {
+          final payload = _makePayload(packet);
+
+          _client.add(payload);
+        }
 
         success = true;
-      } catch (err) {
-        print("Error trying send message to TCP Server: $err");
+      } catch (err, stackTrace) {
+        print(
+            "Error trying send message to TCP Server: $err\nStack Trace: $stackTrace");
 
         success = false;
       } finally {
@@ -94,6 +101,27 @@ class TCPClient {
     }
 
     return false;
+  }
+
+  Uint8List _makePayload(Packet packet) {
+    final packetJson = packet.encode();
+    final payloadBytes = utf8.encode(packetJson);
+
+    final type = "JSON";
+    final typeBytes = Uint8List(4);
+    typeBytes.buffer.asByteData().setUint32(0, type.hashCode);
+
+    final sizeBytes = Uint8List(8);
+    sizeBytes.buffer.asByteData().setUint32(
+        0, payloadBytes.length + typeBytes.length + sizeBytes.length);
+
+    final payload = Uint8List.fromList([
+      ...sizeBytes,
+      ...typeBytes,
+      ...payloadBytes,
+    ]);
+
+    return payload;
   }
 
   void _retryStart() {

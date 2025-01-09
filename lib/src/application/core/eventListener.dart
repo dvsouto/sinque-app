@@ -24,6 +24,7 @@ import 'package:sinque/src/application/events/packetReceived.event.dart';
 import 'package:sinque/src/application/events/packetSent.event.dart';
 import 'package:sinque/src/application/events/pongReceived.event.dart';
 import 'package:sinque/src/application/events/pongSent.event.dart';
+import 'package:sinque/src/application/events/syncedItemsReceived.event.dart';
 import 'package:sinque/src/application/events/textReceived.event.dart';
 import 'package:sinque/src/application/events/textSent.event.dart';
 import 'package:sinque/src/core/appLocator.dart';
@@ -71,6 +72,8 @@ class EventListener {
     _handleEvent<PingSentEvent>();
     _handleEvent<PongReceivedEvent>();
     _handleEvent<PongSentEvent>();
+
+    _handleEvent<SyncedItemsReceivedEvent>();
 
     // Old method --
     // eventBus.on<TextReceivedEvent>().listen((event) => event.listen());

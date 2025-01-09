@@ -1,4 +1,5 @@
 import 'package:sinque/src/application/core/eventEmmiter.dart';
+import 'package:sinque/src/application/events/deviceDisconnected.event.dart';
 import 'package:sinque/src/application/services/networkDevices.service.dart';
 import 'package:sinque/src/domain/DeviceConnection.dart';
 import 'package:sinque/src/domain/Packet.dart';
@@ -10,17 +11,19 @@ class PingSentEvent extends EventEmiter<PingSentEvent> {
 
   @override
   void listen() {
-    print("@sended ping");
+    // print("@sended ping");
 
     final networkDevicesService = NetworkDevicesService();
 
     networkDevicesService.pingAll();
 
-    final lostDevices = networkDevicesService.lostDevices();
+    Future.delayed(Duration(seconds: 1), () {
+      final lostDevices = networkDevicesService.lostDevices();
 
-    for (DeviceConnection lostDevice in lostDevices) {
-      networkDevicesService.remove(lostDevice);
-    }
+      for (DeviceConnection lostDevice in lostDevices) {
+        DeviceDisconnectedEvent(deviceConnection: lostDevice).dispatch();
+      }
+    });
   }
 
   Packet get packet => _packet!;

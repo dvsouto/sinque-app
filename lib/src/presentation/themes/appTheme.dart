@@ -21,6 +21,7 @@ class AppTheme {
         ),
         scaffoldBackgroundColor: accent,
         primaryColor: accent,
+        primarySwatch: Colors.blue,
         colorScheme: ColorScheme.fromSeed(
           seedColor: dark,
           brightness: brightness,
