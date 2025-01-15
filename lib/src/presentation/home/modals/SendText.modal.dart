@@ -6,8 +6,8 @@ import 'package:sinque/src/application/services/packet.service.dart';
 import 'package:sinque/src/presentation/themes/appTheme.dart';
 import 'package:sinque/src/shared/device.util.dart';
 
-class InputTextDialog extends StatefulWidget {
-  const InputTextDialog({super.key});
+class SendTextModal extends StatefulWidget {
+  const SendTextModal({super.key});
 
   static show(BuildContext context) {
     if (Platform.isAndroid || Platform.isIOS) {
@@ -20,29 +20,28 @@ class InputTextDialog extends StatefulWidget {
               bottom: MediaQuery.of(context).viewInsets.bottom,
               top: 0,
             ),
-            child: InputTextDialog(),
+            child: SendTextModal(),
           );
         },
       );
     }
-    // }
 
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           insetPadding: EdgeInsets.zero,
-          child: InputTextDialog(),
+          child: SendTextModal(),
         );
       },
     );
   }
 
   @override
-  State<InputTextDialog> createState() => _InputTextDialogState();
+  State<SendTextModal> createState() => _SendTextModalState();
 }
 
-class _InputTextDialogState extends State<InputTextDialog> {
+class _SendTextModalState extends State<SendTextModal> {
   final TextEditingController _controller = TextEditingController();
 
   void handleSendText() {

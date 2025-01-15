@@ -15,6 +15,8 @@ class PingReceivedEvent extends EventEmiter<PingReceivedEvent> {
     final packetService = PacketService();
     final networkDevicesService = NetworkDevicesService();
 
+    // print("@PingReceivedEvent");
+
     // If it was removed for some reason but received a pong, then add it back to the list
     if (networkDevicesService.add(packet.deviceConnection)) {
       DeviceConnectedEvent(deviceConnection: packet.deviceConnection)

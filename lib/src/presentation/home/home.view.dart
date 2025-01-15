@@ -4,30 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sinque/src/application/services/networkDevices.service.dart';
 import 'package:sinque/src/application/services/networkStatus.service.dart';
+import 'package:sinque/src/presentation/home/modals/ViewDevices.modal.dart';
 import 'package:sinque/src/presentation/home/widgets/ActionButton.widget.dart';
 import 'package:sinque/src/presentation/home/widgets/BlinkingIcon.widget.dart';
-import 'package:sinque/src/presentation/home/widgets/InputTextDialog.widget.dart';
 import 'package:sinque/src/presentation/home/widgets/ListSyncedItem.widget.dart';
-import 'package:sinque/src/presentation/keyboardHandler/keyboardHandler.widget.dart';
+import 'package:sinque/src/presentation/home/modals/SendText.modal.dart';
 import 'package:sinque/src/shared/device.util.dart';
 
 class HomeView extends ConsumerWidget {
   HomeView({super.key});
-
-  // Widget _preview() {
-  //   return Center(
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         Image.asset(
-  //           "assets/images/drag-and-drop.png",
-  //           height: 512,
-  //           width: 512,
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,6 +63,7 @@ class HomeView extends ConsumerWidget {
                   ),
                 ),
                 BlinkingIcon(
+                  onPress: () => ViewDevicesModal.show(context),
                   blinkActive: !networkStatus.isConnected(),
                   child: Padding(
                     padding: EdgeInsets.only(right: 16.0),
@@ -168,7 +154,7 @@ class HomeView extends ConsumerWidget {
                       child: ActionButton(
                         text: "Sync Text",
                         icon: Icons.text_format,
-                        onPressed: () => InputTextDialog.show(context),
+                        onPressed: () => SendTextModal.show(context),
                         // PacketService().sendTextToAllDevices("My text"),
                       ),
                     ),
